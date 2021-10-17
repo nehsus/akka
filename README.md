@@ -1,4 +1,4 @@
-# CS594 Project
+# CS554 Project
 
 ## Group:
  -  Sushen Kumar
