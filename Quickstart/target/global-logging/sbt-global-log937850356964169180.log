@@ -1,0 +1,18 @@
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(reStart, Some(1d36f0f2-42ef-4e6a-a44d-2386637cd075), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: reStart[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
+[0m[[0m[0minfo[0m] [0m[0mUpdating [0m
+[0m[[0m[0minfo[0m] [0m[0mResolved  dependencies[0m
+[0m[[0m[0minfo[0m] [0m[0mUpdating [0m
+[0m[[0m[0minfo[0m] [0m[0mResolved  dependencies[0m
+[0m[[0m[0minfo[0m] [0m[0mUpdating [0m
+[0m[[0m[0minfo[0m] [0m[0mResolved  dependencies[0m
+[0m[[0m[0minfo[0m] [0m[0mFetching artifacts of [0m
+[0m[[0m[0minfo[0m] [0m[0mFetched artifacts of [0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /Users/shen/Documents/acrux/UIC/Concurrency/Project/Quickstart/target/scala-2.13/classes ...[0m
+[0m[[0m[0minfo[0m] [0m[0mNon-compiled module 'compiler-bridge_2.13' for Scala 2.13.1. Compiling...[0m
+[0m[[0m[0minfo[0m] [0m[0m  Compilation completed in 15.33s.[0m
+[0m[[0m[0minfo[0m] [0m[0m[33mApplication [0m[1mquickstart[0m[33m not yet started[0m
+[0m[[0m[0minfo[0m] [0m[0m[33mStarting application [0m[34mquickstart[0m[33m in the background ...[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 23 s, completed 8 Nov 2021, 13:03:42[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m
