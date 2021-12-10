@@ -1,2 +1,0 @@
-resolvers in ThisBuild += "lightbend-commercial-mvn" at "https://repo.lightbend.com/pass/VhTMJ6WkGKGdMcHMvvJBofIeg9E4kQwEyXaGdA3diso4L137/commercial-releases"
-resolvers in ThisBuild += Resolver.url("lightbend-commercial-ivy", url("https://repo.lightbend.com/pass/VhTMJ6WkGKGdMcHMvvJBofIeg9E4kQwEyXaGdA3diso4L137/commercial-releases"))(Resolver.ivyStylePatterns)
