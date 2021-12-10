@@ -1,5 +1,7 @@
-actors:
+group: "Default"
+actor:
   - actorName: "a1"
     actorMsg: "println('test')"
-  - actorName: "Test"
+
+  - actorName: "a2"
     actorMsg: "println('hello')"
