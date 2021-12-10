@@ -1,0 +1,12 @@
+actors:
+  - name: Consumer
+    messages:
+      - type: OrderItem
+        message: Can I get this?
+      - type: CancelItem
+        message: I don't want this item.
+
+  - name: Producer
+    messages:
+      - type: FetchItem
+        message: Got your item
