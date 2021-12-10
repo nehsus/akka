@@ -4,6 +4,7 @@ import akka.actor.typed.ActorSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,8 +23,6 @@ public class ActorSecret {
         //#actor-system
         try {
             parseYML();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,10 +41,10 @@ public class ActorSecret {
     private static void parseYML() throws IOException {
         ArrayList<String> data;
         //InputStream inputStream = new FileInputStream(actorYAML);
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new Constructor(Group.class));
         try (InputStream in = ActorSecret.class.getResourceAsStream("/actors.yml")) {
-            Actors persons = yaml.loadAs(in, Actors.class);
-            for (Actor person : persons.getActors()) {
+            Group group = yaml.load(in);
+            for (Actor person : group.getActors()) {
                 System.out.println(person);
             }
         }
