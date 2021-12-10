@@ -50,5 +50,4 @@ public class Hasher extends AbstractBehavior<Hasher.Hash> {
 
         return this;
     }
-
 }

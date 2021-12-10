@@ -6,5 +6,5 @@ import java.io.File;
  * Utility class for constants
  */
 public class Constant {
-    public static final File actorYAML = new File("src/main/resources/actors.yaml");
+    public static final File actorYAML = new File("src/main/resources/actors.yml");
 }

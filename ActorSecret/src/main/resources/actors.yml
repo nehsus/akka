@@ -1,0 +1,7 @@
+!!edu.uic.cs554.project.Actors
+actors:
+  - actorName: a1
+    actorMsg: println('test')
+
+  - actorName: Test
+    actorMsg: println('hello')

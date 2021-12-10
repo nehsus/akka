@@ -7,11 +7,15 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Main Behavior for an actor
  */
 public class ActorMain extends AbstractBehavior<ActorMain.Whisper> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ActorMain.class);
     private final ActorRef<Hasher.Hash> hasher;
 
     public ActorMain(ActorContext<Whisper> context) {
@@ -43,5 +47,4 @@ public class ActorMain extends AbstractBehavior<ActorMain.Whisper> {
 
         return this;
     }
-
 }

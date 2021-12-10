@@ -4,8 +4,8 @@ package edu.uic.cs554.project;
  * Model for an actor
  */
 public class Actor {
-    private final String actorName;
-    private final String actorMsg;
+    private String actorName;
+    private String actorMsg;
 
     public Actor(String actorName, String actorMsg) {
         this.actorName = actorName;
