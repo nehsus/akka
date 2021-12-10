@@ -16,18 +16,25 @@ public class ActorSecret {
     List<Actor> aList = new ArrayList<>();
 
     public static void main(String[] args) {
-        //#actor-system
-        //final ActorSystem<GreeterMain.SayHello> greeterMain = ActorSystem.create(GreeterMain.create(), "helloakka");
+
         //#actor-system
 
-        //#main-send-messages
-        //greeterMain.tell(new GreeterMain.SayHello("Charles"));
-        //#main-send-messages
         try {
             parseYML();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        final ActorSystem<ActorMain.Whisper> actorMain = ActorSystem.create(
+                ActorMain.create(), "default");
+
+        // TODO: create multiple hashers from aList and communicate
+
+
+
+        //actorMain.tell(new ActorMain.Whisper("test"));
+        //#main-send-messages
+
 
     }
 
@@ -40,7 +47,7 @@ public class ActorSecret {
 
         for (Map.Entry<String, String> set : data.entrySet()) {
             System.out.println(set);
-            // Create actors here
+            // TODO: Create actors list here, return
 
 
         }
