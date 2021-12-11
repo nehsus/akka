@@ -1,13 +1,11 @@
 package edu.uic.cs554.project;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
-import akka.cluster.sharding.typed.ShardingEnvelope;
 import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.Entity;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
@@ -28,6 +26,11 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
      * logger for this class
      */
     private static final Logger logger = LoggerFactory.getLogger(ActorMain.class);
+
+    /**
+     * String for appended hash
+     */
+    private String finalMessage = "";
 
     /**
      * Command interface for starting hash implementation
@@ -99,7 +102,7 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
     }
 
     /**
-     * TO create the maion Actor.
+     * TO create the main Actor.
      *
      * @return
      */
@@ -136,6 +139,8 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
         logger.info("Old hash from " + hasherNumber + ", " + oldHash);
         logger.info("New hash: " + messageReceived.hashCode());
 
+        appendHash(oldHash);
+
         hashers.get(hasherNumber).tell(new Hasher.GetHash(mainActor));
         return this;
     }
@@ -150,4 +155,9 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
         System.out.println("Started making hash");
         return this;
     }
+
+    private void appendHash(String hash) {
+        this.finalMessage +=hash;
+    }
+
 }

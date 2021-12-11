@@ -1,6 +1,5 @@
 package edu.uic.cs554.project;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -18,9 +17,19 @@ import java.util.Objects;
  */
 public class Hasher extends AbstractBehavior<Hasher.Command> {
 
+    /**
+     * Logger
+     */
     private static final Logger logger = LoggerFactory.getLogger(Hasher.class);
 
+    /**
+     * Actor ID
+     */
     private final String entityId;
+
+    /**
+     * Actor's messages/commands
+     */
     private String message = "";
 
     public Hasher(ActorContext<Command> context, String entityId) {
