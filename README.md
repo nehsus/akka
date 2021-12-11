@@ -20,5 +20,13 @@ Please refer the flowchart below for a step-by-step walkthrough.
 
  - Functions:
     The actors can perform two commands, generateHash() and appendToHash(). generateHash() creates a new hash based on the message and entityID, whereas appendToHash() appends to the existing hash created by the previous actor, securely creating a longer password.
+    
+### Requirements and Usage:
 
+ - Java 11, AKKA 2.6.17, snakeYAML 1.29, junit 4.13.2
 
+ - Clone this repo/extract
+
+ - Import into IntelliJ or other IDE
+
+ - Run ActorSecret.java
