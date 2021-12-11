@@ -4,8 +4,8 @@ package edu.uic.cs554.project;
  * JavaBean model for an actor
  */
 public class Actor {
-    public String actorName;
-    public String actorMsg;
+    private String actorName;
+    private String actorMsg;
 
     public Actor() {}
 

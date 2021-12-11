@@ -27,8 +27,8 @@ public class ActorSecret {
             e.printStackTrace();
         }
 
-        final ActorSystem<ActorMain.Whisper> mainActorSystem = ActorSystem.create(
-                ActorMain.create(), "default");
+        final ActorSystem<ActorMain.Command> mainActorSystem = ActorSystem.create(
+                ActorMain.create(), "PasswordHashing");
 
         // TODO: create multiple hashers from aList and communicate
 
@@ -39,42 +39,17 @@ public class ActorSecret {
     }
 
     private static void parseYML() throws IOException {
-        ArrayList<String> data;
-        //InputStream inputStream = new FileInputStream(actorYAML);
         Yaml yaml = new Yaml(new Constructor(Group.class));
         try (InputStream in = ActorSecret.class.getResourceAsStream("/actors.yml")) {
             Group group = yaml.load(in);
+            int i = 0;
             for (Actor person : group.getActors()) {
-                System.out.println(person);
+                logger.info("actor " + i + " name : " + person.getActorName());
+                logger.info("actor " + i + " msg : " + person.getActorMsg());
+                System.out.println("actor " + i + " name : " + person.getActorName());
+                System.out.println("actor " + i + " msg : " + person.getActorMsg());
+                i++;
             }
         }
-
-
-
-//        Yaml yaml = new Yaml(new Constructor(Actor.class));
-//        InputStream inputStream = ActorSecret.class
-//                .getResourceAsStream("src/main/resources/actors.yml");
-//
-//        int count = 0;
-//        for (Object object : yaml.loadAll(inputStream)) {
-//            Actor actor = (Actor) object;
-//            logger.info("Yaml Actor : " + count + " : name : "+ actor.getActorName());
-//            logger.info("message : "+ actor.getActorMsg());
-//            count++;
-//        }
-
-
-//        Yaml yaml = new Yaml(); //new Constructor(Actor.class)
-//        data = yaml.load(inputStream);
-//        logger.info("Yaml Data : " + data);
-//        int i = 1;
-//        for (Map.Entry<String, String> entry : data.entrySet()) {
-//
-//            logger.info("Yaml Actor : " + i + " : name : "+ entry.getKey());
-//            logger.info("message : "+ entry.getValue());
-//            i++;
-//            // TODO: Create actors list here, return
-//
-//        }
     }
 }

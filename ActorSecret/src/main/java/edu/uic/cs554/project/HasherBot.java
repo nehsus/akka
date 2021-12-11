@@ -9,33 +9,34 @@ import akka.actor.typed.javadsl.Receive;
 /**
  * Creates and tracks actors
  */
-public class HasherBot extends AbstractBehavior<Hasher.Hash>  {
+public class HasherBot {
+        //extends AbstractBehavior<Hasher.Command>  {
 
-    private final int max;
-    private int hashCounter;
+//    private final String entityId;
+//    private int hashCounter;
+//
+//    public HasherBot(ActorContext<Hasher.Command> context, String entityId) {
+//        super(context);
+//        this.entityId = entityId;
+//    }
+//
+//    public static Behavior<Hasher.Command> create(String entityId) {
+//        return Behaviors.setup(context -> new HasherBot(context, entityId));
+//    }
+//
+//    @Override
+//    public Receive<Hasher.Command> createReceive() {
+//        return newReceiveBuilder().onMessage(Hasher.Command.class, this::onWhisper).build();
+//    }
 
-    public HasherBot(ActorContext<Hasher.Hash> context, int max) {
-        super(context);
-        this.max = max;
-    }
-
-    public static Behavior<Hasher.Hash> create(int max) {
-        return Behaviors.setup(context -> new HasherBot(context, max));
-    }
-
-    @Override
-    public Receive<Hasher.Hash> createReceive() {
-        return newReceiveBuilder().onMessage(Hasher.Hash.class, this::onWhisper).build();
-    }
-
-    private Behavior<Hasher.Hash> onWhisper(Hasher.Hash message) {
-        hashCounter++;
-        getContext().getLog().info("Made hash {} for {}", hashCounter, message.nextHasher);
-        if (hashCounter == max) {
-            return Behaviors.stopped();
-        } else {
-            message.nextHasher.tell(new Hasher.Hash(message.whisper, getContext().getSelf()));
-            return this;
-        }
-    }
+//    private Behavior<Hasher.Command> onWhisper(Hasher.Command message) {
+//        hashCounter++;
+//        getContext().getLog().info("Made hash {} ", hashCounter);
+//        if (hashCounter == max) {
+//            return Behaviors.stopped();
+//        } else {
+//            message.nextHasher.tell(new Hasher.Command(message.whisper, getContext().getSelf()));
+//            return this;
+//        }
+//    }
 }
