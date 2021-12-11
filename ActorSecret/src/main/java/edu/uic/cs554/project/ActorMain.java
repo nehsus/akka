@@ -1,5 +1,6 @@
 package edu.uic.cs554.project;
 
+import akka.actor.Actor;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -7,7 +8,11 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
+import akka.cluster.sharding.typed.ShardingEnvelope;
+import akka.cluster.sharding.typed.javadsl.ClusterSharding;
+import akka.cluster.sharding.typed.javadsl.Entity;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
+import akka.cluster.sharding.typed.javadsl.EntityTypeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +45,27 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
     private static List<EntityRef<Hasher.Command>> hashers = new ArrayList<>();
 
     public static Behavior<Command> create() {
-        return Behaviors.setup(ActorMain::new);
+        return Behaviors.setup(context -> {
+            ClusterSharding clusterSharding = ClusterSharding.get(context.getSystem());
+            EntityTypeKey<Hasher.Command> typeKey = EntityTypeKey.create(Hasher.Command.class, "Hasher");
+
+            clusterSharding.init(Entity.of(typeKey, ctx -> Hasher.create(ctx.getEntityId())));
+            //TODO: Assuming 2 actors in yaml file
+            for(int i = 0; i < 2; i++) {
+                String hasherIndex = "" + i;
+                hashers.add(clusterSharding.entityRefFor(typeKey, hasherIndex));
+            }
+
+            EntityTypeKey<ActorMain.Command> typeKeyForMainActor = EntityTypeKey.create(ActorMain.Command.class, "MainActor");
+            clusterSharding.init(Entity.of(typeKeyForMainActor, ctx -> ActorMain.createActor()));
+
+            mainActor = clusterSharding.entityRefFor(typeKeyForMainActor, "mainActor");
+            for(EntityRef<Hasher.Command> hasher : hashers) {
+                hasher.tell(new Hasher.GetHash(mainActor));
+            }
+
+            return Behaviors.empty();
+        });
     }
 
     @Override
@@ -48,6 +73,10 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
         return newReceiveBuilder()
                 .onMessage(StartHashing.class, this::onStartHashing)
                 .onMessage(HashedMessagedReceived.class, this::onHashMessageReceive).build();
+    }
+
+    public static Behavior<Command> createActor() {
+        return Behaviors.setup(context -> new ActorMain(context));
     }
 
 //    public static class Whisper {

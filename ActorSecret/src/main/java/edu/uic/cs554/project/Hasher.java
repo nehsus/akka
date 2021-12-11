@@ -64,7 +64,7 @@ public class Hasher extends AbstractBehavior<Hasher.Command> {
 
     private Behavior<Command> onHash(GetHash messageToReply) {
         getContext().getLog().info("Making hash ");
-        //TODO
+        //TODO: Hash messages
         message = "hashed messaged";
         messageToReply.replyTo.tell(new ActorMain.HashedMessagedReceived(this.entityId, message));
         return this;
