@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 
 /**
- * Behavior for a hash actor
+ * Actor class which creates a hash and returns to the main actor.
+ *
  */
 public class Hasher extends AbstractBehavior<Hasher.Command> {
 

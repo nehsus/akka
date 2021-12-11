@@ -4,6 +4,7 @@ import akka.actor.AddressFromURIString;
 import akka.actor.typed.ActorSystem;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import edu.uic.cs554.project.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -17,13 +18,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Default class. Parses yml, launches actors with config
+ * Main class which starts the program
  */
 public class ActorSecret {
 
     private static final Logger logger = LoggerFactory.getLogger(ActorSecret.class);
     private static List<Actor> aList = new ArrayList<>();
 
+    /**
+     * Main method.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
 
         try {
@@ -32,23 +38,23 @@ public class ActorSecret {
             e.printStackTrace();
         }
 
-        Config config = ConfigFactory.load();
-        List<Integer> seedNodePorts = config
+        Config configuration = ConfigFactory.load();
+        List<Integer> portsForSeedNodes = configuration
                 .getStringList("akka.cluster.seed-nodes")
                 .stream()
                 .map(AddressFromURIString::parse)
-                .map(addr -> (Integer) addr.port().get())
+                .map(address -> (Integer) address.port().get())
                 .collect(Collectors.toList());
 
-        List<Integer> ports = Arrays.stream(args).findFirst().map(str ->
-                Collections.singletonList(Integer.parseInt(str))
+        List<Integer> ports = Arrays.stream(args).findFirst().map(string ->
+                Collections.singletonList(Integer.parseInt(string))
         ).orElseGet(() -> {
-            List<Integer> portsAndZero = new ArrayList<>(seedNodePorts);
-            portsAndZero.add(0);
-            return portsAndZero;
+            List<Integer> ports2 = new ArrayList<>(portsForSeedNodes);
+            ports2.add(0);
+            return ports2;
         });
 
-        Config portConfig = configWithPort(ports.get(0));
+        Config portConfig = finalPortsConfig(ports.get(0));
         if (aList.size() != 0) {
             ActorSystem.create(ActorMain.create(aList), "PasswordHashing", portConfig);
         } else {
@@ -56,15 +62,26 @@ public class ActorSecret {
         }
     }
 
-    private static Config configWithPort(int port) {
+    /**
+     * creates final config with ports.
+     *
+     * @param port
+     * @return
+     */
+    private static Config finalPortsConfig(int port) {
         return ConfigFactory.parseMap(
                 Collections.singletonMap("akka.remote.artery.canonical.port", Integer.toString(port))
         ).withFallback(ConfigFactory.load());
     }
 
+    /**
+     * parses YAML file provided as input.
+     *
+     * @throws IOException
+     */
     private static void parseYML() throws IOException {
         Yaml yaml = new Yaml(new Constructor(Group.class));
-        try (InputStream in = ActorSecret.class.getResourceAsStream("/actors.yml")) {
+        try (InputStream in = ActorSecret.class.getResourceAsStream(Constant.YAML_FILE_PATH)) {
             Group group = yaml.load(in);
             int i = 0;
             for (Actor person : group.getActors()) {
