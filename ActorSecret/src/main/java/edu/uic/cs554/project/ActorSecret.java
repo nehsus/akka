@@ -1,6 +1,10 @@
 package edu.uic.cs554.project;
 
+import akka.actor.AddressFromURIString;
 import akka.actor.typed.ActorSystem;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import edu.uic.cs554.project.utils.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -8,73 +12,84 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Default class. Parses yml, launches actors with config
+ * Main class which starts the program
  */
 public class ActorSecret {
 
     private static final Logger logger = LoggerFactory.getLogger(ActorSecret.class);
-    List<Actor> aList = new ArrayList<>();
+    private static List<Actor> aList = new ArrayList<>();
 
+    /**
+     * Main method.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
 
-        //#actor-system
         try {
             parseYML();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        final ActorSystem<ActorMain.Whisper> mainActorSystem = ActorSystem.create(
-                ActorMain.create(), "default");
+        Config configuration = ConfigFactory.load();
+        List<Integer> portsForSeedNodes = configuration
+                .getStringList("akka.cluster.seed-nodes")
+                .stream()
+                .map(AddressFromURIString::parse)
+                .map(address -> (Integer) address.port().get())
+                .collect(Collectors.toList());
 
-        // TODO: create multiple hashers from aList and communicate
+        List<Integer> ports = Arrays.stream(args).findFirst().map(string ->
+                Collections.singletonList(Integer.parseInt(string))
+        ).orElseGet(() -> {
+            List<Integer> ports2 = new ArrayList<>(portsForSeedNodes);
+            ports2.add(0);
+            return ports2;
+        });
 
-
-
-        //actorMain.tell(new ActorMain.Whisper("test"));
-        //#main-send-messages
+        Config portConfig = finalPortsConfig(ports.get(0));
+        if (aList.size() != 0) {
+            ActorSystem.create(ActorMain.create(aList), "PasswordHashing", portConfig);
+        } else {
+            logger.error("No actors found..");
+        }
     }
 
+    /**
+     * creates final config with ports.
+     *
+     * @param port
+     * @return
+     */
+    private static Config finalPortsConfig(int port) {
+        return ConfigFactory.parseMap(
+                Collections.singletonMap("akka.remote.artery.canonical.port", Integer.toString(port))
+        ).withFallback(ConfigFactory.load());
+    }
+
+    /**
+     * parses YAML file provided as input.
+     *
+     * @throws IOException
+     */
     private static void parseYML() throws IOException {
-        ArrayList<String> data;
-        //InputStream inputStream = new FileInputStream(actorYAML);
         Yaml yaml = new Yaml(new Constructor(Group.class));
-        try (InputStream in = ActorSecret.class.getResourceAsStream("/actors.yml")) {
+        try (InputStream in = ActorSecret.class.getResourceAsStream(Constant.YAML_FILE_PATH)) {
             Group group = yaml.load(in);
+            int i = 0;
             for (Actor person : group.getActors()) {
-                System.out.println(person);
+                logger.info("actor " + i + " name : " + person.getActorName());
+                logger.info("actor " + i + " msg : " + person.getActorMsg());
+                aList.add(person);
+                i++;
             }
         }
-
-
-
-//        Yaml yaml = new Yaml(new Constructor(Actor.class));
-//        InputStream inputStream = ActorSecret.class
-//                .getResourceAsStream("src/main/resources/actors.yml");
-//
-//        int count = 0;
-//        for (Object object : yaml.loadAll(inputStream)) {
-//            Actor actor = (Actor) object;
-//            logger.info("Yaml Actor : " + count + " : name : "+ actor.getActorName());
-//            logger.info("message : "+ actor.getActorMsg());
-//            count++;
-//        }
-
-
-//        Yaml yaml = new Yaml(); //new Constructor(Actor.class)
-//        data = yaml.load(inputStream);
-//        logger.info("Yaml Data : " + data);
-//        int i = 1;
-//        for (Map.Entry<String, String> entry : data.entrySet()) {
-//
-//            logger.info("Yaml Actor : " + i + " : name : "+ entry.getKey());
-//            logger.info("message : "+ entry.getValue());
-//            i++;
-//            // TODO: Create actors list here, return
-//
-//        }
     }
 }

@@ -6,48 +6,59 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.cluster.sharding.typed.javadsl.EntityRef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
 /**
- * Behavior for a hash actor
+ * Actor class which creates a hash and returns to the main actor.
+ *
  */
-public class Hasher extends AbstractBehavior<Hasher.Hash> {
+public class Hasher extends AbstractBehavior<Hasher.Command> {
 
-    public Hasher(ActorContext<Hash> context) {
+    private static final Logger logger = LoggerFactory.getLogger(Hasher.class);
+
+    private final String entityId;
+    private String message = "";
+
+    public Hasher(ActorContext<Command> context, String entityId) {
         super(context);
+        this.entityId = entityId;
+    }
+
+    public interface Command extends CborSerializable {}
+
+    public static class GetHash implements Command {
+        private final EntityRef<ActorMain.Command> replyTo;
+
+        public GetHash(EntityRef<ActorMain.Command> replyTo) {
+            this.replyTo = replyTo;
+        }
+    }
+
+    public static Behavior<Command> create(String entityId) {
+        return Behaviors.setup(context -> new Hasher(context, entityId));
+    }
+
+    private Behavior<Command> onHash(GetHash messageToReply) {
+        logger.info("Generating hash for {}", messageToReply);
+        System.out.println("msg: " + messageToReply + " " + hashCode());
+        message = ""+hashCode();
+        messageToReply.replyTo.tell(new ActorMain.HashedMessagedReceived(this.entityId, message));
+        return this;
     }
 
     @Override
-    public Receive<Hash> createReceive() {
-        return newReceiveBuilder().onMessage(Hash.class, this::onHash).build();
+    public Receive<Command> createReceive() {
+        return newReceiveBuilder()
+                .onMessage(GetHash.class, this::onHash)
+                .build();
     }
 
-    public static final class Hash {
-        public final String whisper;
-        public final ActorRef<Hash> nextHasher;
-
-        public Hash(String whisper, ActorRef<Hash> nextHasher) {
-            this.whisper = whisper;
-            this.nextHasher = nextHasher;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(whisper, nextHasher);
-        }
-    }
-
-    public static Behavior<Hash> create() {
-        return Behaviors.setup(Hasher::new);
-    }
-
-    private Behavior<Hash> onHash(Hash command) {
-        getContext().getLog().info("Making hash: {} ", command.whisper);
-        int hash = hashCode();
-
-        command.nextHasher.tell(new Hash(command.whisper, getContext().getSelf()));
-
-        return this;
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityId, message);
     }
 }
