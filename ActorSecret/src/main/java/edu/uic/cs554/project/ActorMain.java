@@ -26,7 +26,7 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
 
     private static final Logger logger = LoggerFactory.getLogger(ActorMain.class);
 
-    public interface Command {}
+    public interface Command extends CborSerializable  {}
 
     public final static class StartHashing implements Command {
         private final String value;
@@ -60,6 +60,7 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
             clusterSharding.init(Entity.of(typeKeyForMainActor, ctx -> ActorMain.createActor()));
 
             mainActor = clusterSharding.entityRefFor(typeKeyForMainActor, "mainActor");
+            System.out.println("Starting ");
             for(EntityRef<Hasher.Command> hasher : hashers) {
                 hasher.tell(new Hasher.GetHash(mainActor));
             }
@@ -102,12 +103,14 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
         int hasherNumber = Integer.parseInt(messageReceived.entityId);
 
         getContext().getLog().info("Message received from : " + messageReceived.entityId + ", message : " + messageReceived.message);
+        System.out.println("Message received from : " + messageReceived.entityId + ", message : " + messageReceived.message);
         hashers.get(hasherNumber).tell(new Hasher.GetHash(mainActor));
         return this;
     }
 
     private Behavior<Command> onStartHashing(StartHashing command) {
         getContext().getLog().info("Started Making hash ");
+        System.out.println("Started making hash");
         return this;
     }
 

@@ -26,7 +26,7 @@ public class Hasher extends AbstractBehavior<Hasher.Command> {
         this.entityId = entityId;
     }
 
-    public interface Command {}
+    public interface Command extends CborSerializable {}
 
     public static class GetHash implements Command {
         private final EntityRef<ActorMain.Command> replyTo;
@@ -64,6 +64,7 @@ public class Hasher extends AbstractBehavior<Hasher.Command> {
 
     private Behavior<Command> onHash(GetHash messageToReply) {
         getContext().getLog().info("Making hash ");
+        System.out.println("Making hash ");
         //TODO: Hash messages
         message = "hashed messaged";
         messageToReply.replyTo.tell(new ActorMain.HashedMessagedReceived(this.entityId, message));
