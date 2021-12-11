@@ -1,6 +1,5 @@
 package edu.uic.cs554.project;
 
-import akka.actor.Actor;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Main Behavior for an actor
@@ -26,7 +26,8 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
 
     private static final Logger logger = LoggerFactory.getLogger(ActorMain.class);
 
-    public interface Command extends CborSerializable  {}
+    public interface Command extends CborSerializable {
+    }
 
     public final static class StartHashing implements Command {
         private final String value;
@@ -38,21 +39,22 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
 
     public ActorMain(ActorContext<Command> context) {
         super(context);
-        //hasher = context.spawn(Hasher.create(), "hasher");
     }
 
     private static EntityRef<Command> mainActor;
     private static List<EntityRef<Hasher.Command>> hashers = new ArrayList<>();
 
-    public static Behavior<Command> create() {
+    public static Behavior<Command> create(List<edu.uic.cs554.project.Actor> aList) {
         return Behaviors.setup(context -> {
             ClusterSharding clusterSharding = ClusterSharding.get(context.getSystem());
             EntityTypeKey<Hasher.Command> typeKey = EntityTypeKey.create(Hasher.Command.class, "Hasher");
 
             clusterSharding.init(Entity.of(typeKey, ctx -> Hasher.create(ctx.getEntityId())));
-            //TODO: Assuming 2 actors in yaml file
-            for(int i = 0; i < 2; i++) {
-                String hasherIndex = "" + i;
+
+            // Iterate through list of actors
+            for (Actor person : aList) {
+                System.out.println("Creating actor: " + person.getActorName());
+                String hasherIndex = person.getActorName();
                 hashers.add(clusterSharding.entityRefFor(typeKey, hasherIndex));
             }
 
@@ -61,7 +63,7 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
 
             mainActor = clusterSharding.entityRefFor(typeKeyForMainActor, "mainActor");
             System.out.println("Starting ");
-            for(EntityRef<Hasher.Command> hasher : hashers) {
+            for (EntityRef<Hasher.Command> hasher : hashers) {
                 hasher.tell(new Hasher.GetHash(mainActor));
             }
 
@@ -77,17 +79,8 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
     }
 
     public static Behavior<Command> createActor() {
-        return Behaviors.setup(context -> new ActorMain(context));
+        return Behaviors.setup(ActorMain::new);
     }
-
-//    public static class Whisper {
-//        public final String whisper;
-//
-//        public Whisper(String whisper) {
-//            this.whisper = whisper;
-//        }
-//    }
-
 
     public final static class HashedMessagedReceived implements Command {
         public final String entityId;
@@ -97,28 +90,32 @@ public class ActorMain extends AbstractBehavior<ActorMain.Command> {
             this.entityId = entityId;
             this.message = message;
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(entityId, message);
+        }
     }
 
     private Behavior<Command> onHashMessageReceive(HashedMessagedReceived messageReceived) {
         int hasherNumber = Integer.parseInt(messageReceived.entityId);
 
-        getContext().getLog().info("Message received from : " + messageReceived.entityId + ", message : " + messageReceived.message);
-        System.out.println("Message received from : " + messageReceived.entityId + ", message : " + messageReceived.message);
+        String oldHash = messageReceived.message;
+
+        System.out.println("Old hash from " + hasherNumber + ", " + oldHash);
+        System.out.println("New hash: " + messageReceived.hashCode());
+        logger.info("Old hash from " + hasherNumber + ", " + oldHash);
+        logger.info("New hash: " + messageReceived.hashCode());
+        // TODO: Do something with hash
+
         hashers.get(hasherNumber).tell(new Hasher.GetHash(mainActor));
         return this;
     }
+
 
     private Behavior<Command> onStartHashing(StartHashing command) {
         getContext().getLog().info("Started Making hash ");
         System.out.println("Started making hash");
         return this;
     }
-
-//    private Behavior<Whisper> onWhisper(Whisper command) {
-//
-//        ActorRef<Hasher.Command> nextHasher = getContext().spawn(HasherBot.create(5), command.whisper);
-//        hasher.tell(new Hasher.Command(command.whisper, nextHasher));
-//
-//        return this;
-//    }
 }

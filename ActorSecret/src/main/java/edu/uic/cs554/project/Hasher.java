@@ -19,8 +19,9 @@ public class Hasher extends AbstractBehavior<Hasher.Command> {
 
     private static final Logger logger = LoggerFactory.getLogger(Hasher.class);
 
-    private String message = "";
     private final String entityId;
+    private String message = "";
+
     public Hasher(ActorContext<Command> context, String entityId) {
         super(context);
         this.entityId = entityId;
@@ -36,38 +37,27 @@ public class Hasher extends AbstractBehavior<Hasher.Command> {
         }
     }
 
+    public static Behavior<Command> create(String entityId) {
+        return Behaviors.setup(context -> new Hasher(context, entityId));
+    }
+
+    private Behavior<Command> onHash(GetHash messageToReply) {
+        logger.info("Generating hash for {}", messageToReply);
+        System.out.println("msg: " + messageToReply + " " + hashCode());
+        message = ""+hashCode();
+        messageToReply.replyTo.tell(new ActorMain.HashedMessagedReceived(this.entityId, message));
+        return this;
+    }
+
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
                 .onMessage(GetHash.class, this::onHash)
                 .build();
     }
-//
-//    public static final class Hash {
-//        public final String whisper;
-//        public final ActorRef<Hash> nextHasher;
-//
-//        public Hash(String whisper, ActorRef<Hash> nextHasher) {
-//            this.whisper = whisper;
-//            this.nextHasher = nextHasher;
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return Objects.hash(whisper, nextHasher);
-//        }
-//    }
 
-    public static Behavior<Command> create(String entityId) {
-        return Behaviors.setup(context -> new Hasher(context, entityId));
-    }
-
-    private Behavior<Command> onHash(GetHash messageToReply) {
-        getContext().getLog().info("Making hash ");
-        System.out.println("Making hash ");
-        //TODO: Hash messages
-        message = "hashed messaged";
-        messageToReply.replyTo.tell(new ActorMain.HashedMessagedReceived(this.entityId, message));
-        return this;
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityId, message);
     }
 }

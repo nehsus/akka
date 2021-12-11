@@ -22,11 +22,10 @@ import java.util.stream.Collectors;
 public class ActorSecret {
 
     private static final Logger logger = LoggerFactory.getLogger(ActorSecret.class);
-    List<Actor> aList = new ArrayList<>();
+    private static List<Actor> aList = new ArrayList<>();
 
     public static void main(String[] args) {
 
-        //#actor-system
         try {
             parseYML();
         } catch (IOException e) {
@@ -38,7 +37,7 @@ public class ActorSecret {
                 .getStringList("akka.cluster.seed-nodes")
                 .stream()
                 .map(AddressFromURIString::parse)
-                .map(addr -> (Integer) addr.port().get()) // Missing Java getter for port, fixed in Akka 2.6.2
+                .map(addr -> (Integer) addr.port().get())
                 .collect(Collectors.toList());
 
         List<Integer> ports = Arrays.stream(args).findFirst().map(str ->
@@ -50,15 +49,11 @@ public class ActorSecret {
         });
 
         Config portConfig = configWithPort(ports.get(0));
-        final ActorSystem<ActorMain.Command> mainActorSystem = ActorSystem.create(
-                ActorMain.create(), "PasswordHashing", portConfig);
-
-        // TODO: create multiple hashers from aList and communicate
-
-
-
-        //actorMain.tell(new ActorMain.Whisper("test"));
-        //#main-send-messages
+        if (aList.size() != 0) {
+            ActorSystem.create(ActorMain.create(aList), "PasswordHashing", portConfig);
+        } else {
+            logger.error("No actors found..");
+        }
     }
 
     private static Config configWithPort(int port) {
@@ -75,8 +70,7 @@ public class ActorSecret {
             for (Actor person : group.getActors()) {
                 logger.info("actor " + i + " name : " + person.getActorName());
                 logger.info("actor " + i + " msg : " + person.getActorMsg());
-                System.out.println("actor " + i + " name : " + person.getActorName());
-                System.out.println("actor " + i + " msg : " + person.getActorMsg());
+                aList.add(person);
                 i++;
             }
         }

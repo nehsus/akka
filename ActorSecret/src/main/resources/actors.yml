@@ -1,7 +1,8 @@
 group: "Default"
 actor:
-  - actorName: "a1"
-    actorMsg: "println('test')"
-
-  - actorName: "a2"
-    actorMsg: "println('hello')"
+  - actorName: "1"
+    actorMsg: "println('test'); hashCode();"
+  - actorName: "2"
+    actorMsg: "hashCode();"
+  - actorName: "3"
+    actorMsg: "hashCode()"
